@@ -53,14 +53,14 @@ optional<bool> PM2X05Component::check_data_() {
 
     switch (this->type_) {
         case PM2X05_TYPE_2005:
-        payload_header = this->data_[1];
-        payload_length = this->data_[2];
-        this->situation_ = this->data_[3];
+          payload_header = this->data_[1];
+          payload_length = this->data_[2];
+          this->situation_ = this->data_[3];
         break;
         case PM2X05_TYPE_2105:
-        payload_header = this->data_[1];
-        payload_length = this->data_[2];
-        this->situation_ = this->data_[3];
+          payload_header = this->data_[0];
+          payload_length = this->data_[1];
+          this->situation_ = this->data_[2];
         break;
     }
     header_matches = payload_header == 0x16;
@@ -84,7 +84,7 @@ optional<bool> PM2X05Component::check_data_() {
             return true;
     }
 
-  return {};
+  return false;
 }
 
 void PM2X05Component::parse_data_() {
@@ -142,7 +142,14 @@ uint16_t PM2X05Component::get_16_bit_uint_(uint8_t start_index) {
 }
 
 void PM2X05Component::dump_config() {
-  ESP_LOGCONFIG(TAG, "PM2X05:");
+  switch (this->type_) {
+    case PM2X05_TYPE_2005:
+      ESP_LOGCONFIG(TAG, "PM2005:");
+      break;
+    case PM2X05_TYPE_2105:
+      ESP_LOGCONFIG(TAG, "PM2105:");
+      break;
+  }
   LOG_I2C_DEVICE(this);
   if (this->pm_1_0_sensor_ != nullptr)
     LOG_SENSOR("  ", "PM1.0", this->pm_1_0_sensor_);
